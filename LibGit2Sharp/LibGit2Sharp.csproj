@@ -15,7 +15,6 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\libgit2sharp.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
     <None Include="Core\Handles\Objects.tt">

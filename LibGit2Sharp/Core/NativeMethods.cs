@@ -1052,6 +1052,23 @@ namespace LibGit2Sharp.Core
         internal static extern unsafe UIntPtr git_packbuilder_written(git_packbuilder* packbuilder);
 
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern unsafe int git_refdb_set_backend(ReferenceDatabaseSafeHandle refdb, IntPtr backend);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern unsafe void git_refdb_free(IntPtr refdb);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern unsafe int git_reference__alloc(
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string name,
+            IntPtr oid,
+            IntPtr peel);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern unsafe int git_reference__alloc_symbolic(
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string name,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string target);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe int git_reference_create(
             out git_reference* reference,
             git_repository* repo,
@@ -1137,6 +1154,10 @@ namespace LibGit2Sharp.Core
 
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe GitReferenceType git_reference_type(git_reference* reference);
+
+        // @sco review
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern GitReferenceType git_reference_type(NotOwnedReferenceSafeHandle reference);
 
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe int git_reference_ensure_log(
@@ -1463,6 +1484,10 @@ namespace LibGit2Sharp.Core
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(LaxFilePathNoCleanupMarshaler))]
         internal static extern unsafe FilePath git_repository_path(git_repository* repository);
+
+        // @sco review proto ...
+        [DllImport(libgit2)]
+        internal static extern int git_repository_refdb(out ReferenceDatabaseSafeHandle refdb, git_repository* repository);
 
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe void git_repository_set_config(

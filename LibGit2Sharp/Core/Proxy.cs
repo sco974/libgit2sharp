@@ -1862,6 +1862,21 @@ namespace LibGit2Sharp.Core
 
 #endregion
 
+// @sco to review region
+#region git_refdb_
+
+        public static void git_refdb_set_backend(ReferenceDatabaseSafeHandle refdb, IntPtr backend)
+        {
+            Ensure.ZeroResult(NativeMethods.git_refdb_set_backend(refdb, backend));
+        }
+
+        public static void git_refdb_free(IntPtr refdb)
+        {
+            NativeMethods.git_refdb_free(refdb);
+        }
+
+#endregion
+
 #region git_reference_
 
         public static unsafe ReferenceHandle git_reference_create(
@@ -1878,6 +1893,39 @@ namespace LibGit2Sharp.Core
             Ensure.ZeroResult(res);
 
             return new ReferenceHandle(handle, true);
+        }
+
+        public static IntPtr git_reference__alloc(string name, ObjectId oid)
+        {
+            // GitOid is not nullable, do the IntPtr marshalling ourselves
+            IntPtr oidPtr;
+
+            if (oid == null)
+            {
+                oidPtr = IntPtr.Zero;
+            }
+            else
+            {
+                oidPtr = Marshal.AllocHGlobal(20);
+                Marshal.Copy(oid.Oid.Id, 0, oidPtr, 20);
+            }
+
+            try
+            {
+                return NativeMethods.git_reference__alloc(name, oidPtr, IntPtr.Zero);
+            }
+            finally
+            {
+                if (oidPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(oidPtr);
+                }
+            }
+        }
+
+        public static IntPtr  git_reference__alloc_symbolic(string name, string target)
+        {
+            return NativeMethods.git_reference__alloc_symbolic(name, target);
         }
 
         public static unsafe ReferenceHandle git_reference_symbolic_create(
@@ -1948,6 +1996,11 @@ namespace LibGit2Sharp.Core
             return NativeMethods.git_reference_name(reference);
         }
 
+        public static string git_reference_name(NotOwnedReferenceSafeHandle reference)
+        {
+            return NativeMethods.git_reference_name(reference);
+        }
+
         public static unsafe void git_reference_remove(RepositoryHandle repo, string name)
         {
             int res = NativeMethods.git_reference_remove(repo, name);
@@ -1957,6 +2010,12 @@ namespace LibGit2Sharp.Core
         public static unsafe ObjectId git_reference_target(git_reference* reference)
         {
             return ObjectId.BuildFromPtr(NativeMethods.git_reference_target(reference));
+        }
+
+        // @sco to review ...
+        public static ObjectId git_reference_target(NotOwnedReferenceSafeHandle reference)
+        {
+            return NativeMethods.git_reference_target(reference).MarshalAsObjectId();
         }
 
         public static unsafe ReferenceHandle git_reference_rename(
@@ -2000,6 +2059,18 @@ namespace LibGit2Sharp.Core
         }
 
         public static unsafe GitReferenceType git_reference_type(git_reference* reference)
+        {
+            return NativeMethods.git_reference_type(reference);
+        }
+
+        // @sco to review
+        public static string git_reference_symbolic_target(NotOwnedReferenceSafeHandle reference)
+        {
+            return NativeMethods.git_reference_symbolic_target(reference);
+        }
+
+        // @sco to review
+        public static GitReferenceType git_reference_type(NotOwnedReferenceSafeHandle reference)
         {
             return NativeMethods.git_reference_type(reference);
         }
@@ -2584,6 +2655,16 @@ namespace LibGit2Sharp.Core
         public static unsafe void git_repository_set_config(RepositoryHandle repo, ConfigurationHandle config)
         {
             NativeMethods.git_repository_set_config(repo, config);
+        }
+
+        // @sco to review
+        public static ReferenceDatabaseSafeHandle git_repository_refdb(RepositoryHandle repo)
+        {
+            ReferenceDatabaseSafeHandle handle;
+            int res = NativeMethods.git_repository_refdb(out handle, repo);
+            Ensure.ZeroResult(res);
+
+            return handle;
         }
 
         public static unsafe void git_repository_set_ident(RepositoryHandle repo, string name, string email)
