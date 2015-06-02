@@ -2530,6 +2530,24 @@ namespace LibGit2Sharp.Core
             return RepositoryStateChecker(repo, NativeMethods.git_repository_head_unborn);
         }
 
+        // @sco to review
+        public static Identity git_repository_ident(RepositorySafeHandle repo)
+        {
+            string name;
+            string email;
+
+            int res = NativeMethods.git_repository_ident(out name, out email, repo);
+            Ensure.ZeroResult(res);
+
+            if (string.IsNullOrEmpty(name) ||
+                string.IsNullOrEmpty(email))
+            {
+                return null;
+            }
+
+            return new Identity(name, email);
+        }
+
         public static unsafe IndexHandle git_repository_index(RepositoryHandle repo)
         {
             git_index* handle;
@@ -3277,7 +3295,77 @@ namespace LibGit2Sharp.Core
 
 #endregion
 
+#region git_transaction_
+
+        public static TransactionSafeHandle git_transaction_new(RepositorySafeHandle repo)
+        {
+            TransactionSafeHandle tx;
+            int res = NativeMethods.git_transaction_new(out tx, repo);
+            Ensure.ZeroResult(res);
+            return tx;
+        }
+
+        public static void git_transaction_lock_ref(TransactionSafeHandle tx, string refName)
+        {
+            int res = NativeMethods.git_transaction_lock_ref(tx, refName);
+            Ensure.ZeroResult(res);
+        }
+
+        public static void git_transaction_set_target(TransactionSafeHandle tx, string refName, GitOid oid, Identity ident, string msg)
+        {
+            using (SignatureSafeHandle sigHandle = ident.SafeBuildNowSignatureHandle())
+            {
+                int res = NativeMethods.git_transaction_set_target(tx, refName, ref oid, sigHandle, msg);
+                Ensure.ZeroResult(res);
+            }
+        }
+
+        public static void git_transaction_set_symbolic_target(
+            TransactionSafeHandle tx,
+            string refName,
+            string target,
+            Identity ident,
+            string msg)
+        {
+            using (SignatureSafeHandle sigHandle = ident.SafeBuildNowSignatureHandle())
+            {
+                int res = NativeMethods.git_transaction_set_symbolic_target(
+                    tx,
+                    refName,
+                    target,
+                    sigHandle,
+                    msg);
+                Ensure.ZeroResult(res);
+            }
+        }
+
+        public static void git_transaction_set_reflog(TransactionSafeHandle tx, string refName, IntPtr reflog)
+        {
+            int res = NativeMethods.git_transaction_set_reflog(tx, refName, reflog);
+            Ensure.ZeroResult(res);
+        }
+
+        public static void git_transaction_remove(TransactionSafeHandle tx, string refName)
+        {
+            int res = NativeMethods.git_transaction_remove(tx, refName);
+            Ensure.ZeroResult(res);
+        }
+
+        public static void git_transaction_commit(TransactionSafeHandle tx)
+        {
+            int res = NativeMethods.git_transaction_commit(tx);
+            Ensure.ZeroResult(res);
+        }
+
+        public static void git_transaction_free(IntPtr tx)
+        {
+            NativeMethods.git_transaction_free(tx);
+        }
+
+#endregion
+
 #region git_transport_
+
 
         public static void git_transport_register(String prefix, IntPtr transport_cb, IntPtr param)
         {

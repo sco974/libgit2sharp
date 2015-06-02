@@ -1051,12 +1051,15 @@ namespace LibGit2Sharp.Core
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe UIntPtr git_packbuilder_written(git_packbuilder* packbuilder);
 
+        // @sco to review
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe int git_refdb_set_backend(ReferenceDatabaseSafeHandle refdb, IntPtr backend);
 
+        // @sco to review
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe void git_refdb_free(IntPtr refdb);
 
+        // @sco to review
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern unsafe int git_reference__alloc(
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string name,
@@ -1844,6 +1847,55 @@ namespace LibGit2Sharp.Core
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal unsafe delegate int git_transport_certificate_check_cb(git_certificate* cert, int valid, IntPtr hostname, IntPtr payload);
+
+// @sco to region to review
+#region _transaction
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_new(
+            out TransactionSafeHandle transaction,
+            git_repository* repo);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_lock_ref(
+            TransactionSafeHandle transaction,
+            string refName);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_set_target(
+            TransactionSafeHandle tx,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string refName,
+            ref GitOid target, // const git_oid*
+            SignatureSafeHandle sig, // const git_signature*
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string msg); // const char* msg
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_set_symbolic_target(
+            TransactionSafeHandle tx,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string refName, // const char*
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string target, // const char*,
+            SignatureSafeHandle sig, // const git_signature*,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string msg // const char* msg);
+            );
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_set_reflog(
+            TransactionSafeHandle tx,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string refName, // const char* refname,
+            IntPtr reflog // const git_reflog* reflog
+            );
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_remove(
+            TransactionSafeHandle tx,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalCookie = UniqueId.UniqueIdentifier, MarshalTypeRef = typeof(StrictUtf8Marshaler))] string refName // const char* refname,
+            );
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int git_transaction_commit(TransactionSafeHandle tx);
+
+        [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void git_transaction_free(IntPtr tx);
+#endregion
 
         [DllImport(libgit2, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int git_transport_register(
